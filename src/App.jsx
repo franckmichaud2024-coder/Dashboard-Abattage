@@ -3616,7 +3616,7 @@ export default function App() {
     if (!supabase || !session?.user || !dashboardCloudLoaded) return undefined;
 
     const channel = supabase
-      .channel("dashboard_state_realtime")
+      .channel("dashboard_state_abattage_realtime")
       .on(
         "postgres_changes",
         {
