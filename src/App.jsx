@@ -17,9 +17,10 @@ const STORAGE_KEY = "dashboard_abattage_v18_pc_stable";
 const KPI_VISIBILITY_KEY = "dashboard_kpi_visibility_v1";
 const KPI_ORDER_KEY = "dashboard_kpi_order_v1";
 const HISTORY_KEY = "dashboard_historique_abattage_v1";
-const HISTORY_IMAGE_KEY = "dashboard_historique_images_v1";
+const HISTORY_IMAGE_KEY = "dashboard_historique_images_abattage_v1";
 const DASHBOARD_STATE_TABLE = "dashboard_state_abattage";
 const DASHBOARD_IMAGES_BUCKET = "dashboard-images-abattage";
+const PRODUCTION_HISTORY_TABLE = "production_history_abattage";
 
 const UI_FONT = "Inter, Segoe UI, Roboto, Arial, sans-serif";
 
@@ -2035,7 +2036,7 @@ function MobileBlocCard({ bloc, updateBloc, mobileCompact }) {
       </div>
 
       <div style={{ marginTop: 8 }}>
-        <div style={{ fontSize: 11, marginBottom: 4, fontWeight: 700 }}>Coupe cible (%)</div>
+        <div style={{ fontSize: 11, marginBottom: 4, fontWeight: 700 }}>Cible abattage (%)</div>
         <select
           style={yellowInputStyle(mobileCompact, true, true)}
           value={bloc.ciblePct}
@@ -3592,7 +3593,7 @@ export default function App() {
     if (!supabase || !session?.user) return;
 
     const { data, error } = await supabase
-      .from("production_history")
+      .from(PRODUCTION_HISTORY_TABLE)
       .select("*")
       .eq("user_id", session.user.id)
       .order("date", { ascending: true });
@@ -4152,7 +4153,7 @@ export default function App() {
       };
 
       const { error } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .upsert(payload, { onConflict: "user_id,date,shift" });
 
       if (error) {
@@ -4175,7 +4176,7 @@ export default function App() {
   async function updateHistoryComment(id, commentaire) {
     if (supabase && session?.user) {
       const { error } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .update({ commentaire })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4200,7 +4201,7 @@ export default function App() {
 
     if (supabase && session?.user) {
       const { error } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .delete()
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4262,7 +4263,7 @@ export default function App() {
       const nextPhotos = [...(Array.isArray(row.photos) ? row.photos : []), ...uploaded];
 
       const { error: updateError } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .update({ photos: nextPhotos })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4309,7 +4310,7 @@ export default function App() {
           : photos.filter((_, index) => index !== imageIndex);
 
       const { error: updateError } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .update({ photos: nextPhotos })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4335,7 +4336,7 @@ export default function App() {
 
     if (supabase && session?.user) {
       const { error } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .delete()
         .eq("user_id", session.user.id)
         .eq("shift", targetShift);
@@ -4572,7 +4573,7 @@ export default function App() {
         </div>
 
         <HistoryChart
-          title="Historique quart de jour"
+          title="Historique abattage - quart de jour"
           data={[...historyJour].sort(sortByDateAsc)}
           onDelete={deleteHistoryEntry}
           onClear={() => clearHistoryForShift("jour")}
@@ -4619,7 +4620,7 @@ export default function App() {
         </div>
 
         <HistoryChart
-          title="Historique quart de soir"
+          title="Historique abattage - quart de soir"
           data={[...historySoir].sort(sortByDateAsc)}
           onDelete={deleteHistoryEntry}
           onClear={() => clearHistoryForShift("soir")}
@@ -4998,7 +4999,7 @@ export default function App() {
                     fontFamily: UI_FONT,
                   }}
                 >
-                  ☀ Historique jour
+                  ☀ Historique abattage jour
                 </button>
 
                 <button
@@ -5045,7 +5046,7 @@ export default function App() {
                     fontFamily: UI_FONT,
                   }}
                 >
-                  🌙 Historique soir
+                  🌙 Historique abattage soir
                 </button>
 
                 </div>
@@ -5912,7 +5913,7 @@ export default function App() {
                     marginBottom: 8,
                   }}
                 >
-                  Tableau de coupe par bloc
+                  Tableau abattage par bloc
                 </div>
 
                 {mobileCompact ? (
@@ -5948,10 +5949,10 @@ export default function App() {
                         "Cadence cible / h",
                         "Potentiel théorique",
                         "Objectif (%)",
-                        "Objectif réel",
-                        "Coupe réelle cumulative",
-                        "Réel bloc",
-                        "Écart de coupe",
+                        "Objectif réel selon objectif (%)",
+                        "Abattage réel cumulatif",
+                        "Abattage réel par bloc",
+                        "Écart abattage",
                         "Efficacité réelle",
                       ].map((h) => (
                         <div
