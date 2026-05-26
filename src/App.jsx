@@ -3428,9 +3428,9 @@ export default function App() {
     setRoute(path);
   }
 
-  function navigateHistoryRoute(path) {
+  async function navigateHistoryRoute(path) {
     const allowed = await validateHistoryAccess();
-if (!allowed) return;
+    if (!allowed) return;
     navigateRoute(path);
   }
 
@@ -3441,12 +3441,18 @@ if (!allowed) return;
   }, []);
 
   useEffect(() => {
-    if (route === "/historique-jour" || route === "/historique-soir") {
-      if (!validateHistoryAccess()) {
-        window.history.replaceState({}, "", "/");
-        setRoute("/");
+    async function checkHistoryAccessOnLoad() {
+      if (route === "/historique-jour" || route === "/historique-soir") {
+        const allowed = await validateHistoryAccess();
+
+        if (!allowed) {
+          window.history.replaceState({}, "", "/");
+          setRoute("/");
+        }
       }
     }
+
+    checkHistoryAccessOnLoad();
   }, []);
 
 
