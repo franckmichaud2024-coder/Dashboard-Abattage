@@ -17,7 +17,7 @@ const STORAGE_KEY = "dashboard_abattage_v18_pc_stable";
 const KPI_VISIBILITY_KEY = "dashboard_kpi_visibility_v1";
 const KPI_ORDER_KEY = "dashboard_kpi_order_v1";
 const HISTORY_KEY = "dashboard_historique_abattage_v1";
-const HISTORY_IMAGE_KEY = "dashboard_historique_images_abattage_v1";
+const HISTORY_IMAGE_KEY = "dashboard_historique_images_v1";
 const DASHBOARD_STATE_TABLE = "dashboard_state_abattage";
 const DASHBOARD_IMAGES_BUCKET = "dashboard-images-abattage";
 const PRODUCTION_HISTORY_TABLE = "production_history_abattage";
@@ -2036,7 +2036,7 @@ function MobileBlocCard({ bloc, updateBloc, mobileCompact }) {
       </div>
 
       <div style={{ marginTop: 8 }}>
-        <div style={{ fontSize: 11, marginBottom: 4, fontWeight: 700 }}>Cible abattage (%)</div>
+        <div style={{ fontSize: 11, marginBottom: 4, fontWeight: 700 }}>Coupe cible (%)</div>
         <select
           style={yellowInputStyle(mobileCompact, true, true)}
           value={bloc.ciblePct}
@@ -4573,7 +4573,7 @@ export default function App() {
         </div>
 
         <HistoryChart
-          title="Historique abattage - quart de jour"
+          title="Historique quart de jour"
           data={[...historyJour].sort(sortByDateAsc)}
           onDelete={deleteHistoryEntry}
           onClear={() => clearHistoryForShift("jour")}
@@ -4620,7 +4620,7 @@ export default function App() {
         </div>
 
         <HistoryChart
-          title="Historique abattage - quart de soir"
+          title="Historique quart de soir"
           data={[...historySoir].sort(sortByDateAsc)}
           onDelete={deleteHistoryEntry}
           onClear={() => clearHistoryForShift("soir")}
@@ -4999,7 +4999,7 @@ export default function App() {
                     fontFamily: UI_FONT,
                   }}
                 >
-                  ☀ Historique abattage jour
+                  ☀ Historique jour
                 </button>
 
                 <button
@@ -5046,7 +5046,7 @@ export default function App() {
                     fontFamily: UI_FONT,
                   }}
                 >
-                  🌙 Historique abattage soir
+                  🌙 Historique soir
                 </button>
 
                 </div>
@@ -5913,7 +5913,7 @@ export default function App() {
                     marginBottom: 8,
                   }}
                 >
-                  Tableau abattage par bloc
+                  Tableau de coupe par bloc
                 </div>
 
                 {mobileCompact ? (
@@ -5950,9 +5950,9 @@ export default function App() {
                         "Potentiel théorique",
                         "Objectif (%)",
                         "Objectif réel selon objectif (%)",
-                        "Abattage réel cumulatif",
-                        "Abattage réel par bloc",
-                        "Écart abattage",
+                        "Coupe réelle cumulative",
+                        "Coupe réel par bloc",
+                        "Écart de coupe",
                         "Efficacité réelle",
                       ].map((h) => (
                         <div
