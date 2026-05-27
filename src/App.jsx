@@ -20,126 +20,23 @@ const HISTORY_KEY = "dashboard_historique_abattage_v1";
 const HISTORY_IMAGE_KEY = "dashboard_historique_images_v1";
 const DASHBOARD_STATE_TABLE = "dashboard_state_abattage";
 const DASHBOARD_IMAGES_BUCKET = "dashboard-images-abattage";
-const PRODUCTION_HISTORY_TABLE = "production_history_abattage";
 
 const UI_FONT = "Inter, Segoe UI, Roboto, Arial, sans-serif";
 
 const HISTORY_PASSWORD = "1Mixture2*";
 
 function validateHistoryAccess() {
-  const overlay = document.createElement("div");
+  const entered = window.prompt("Mot de passe requis pour accéder aux historiques :");
 
-  overlay.style.position = "fixed";
-  overlay.style.top = "0";
-  overlay.style.left = "0";
-  overlay.style.width = "100%";
-  overlay.style.height = "100%";
-  overlay.style.background = "rgba(0,0,0,0.55)";
-  overlay.style.display = "flex";
-  overlay.style.alignItems = "center";
-  overlay.style.justifyContent = "center";
-  overlay.style.zIndex = "999999";
+  if (entered === HISTORY_PASSWORD) {
+    return true;
+  }
 
-  const box = document.createElement("div");
+  if (entered !== null) {
+    window.alert("Mot de passe invalide");
+  }
 
-  box.style.background = "#0b1624";
-  box.style.padding = "24px";
-  box.style.borderRadius = "16px";
-  box.style.border = "1px solid rgba(74,190,255,0.25)";
-  box.style.width = "320px";
-  box.style.boxShadow = "0 0 30px rgba(0,0,0,0.5)";
-  box.style.fontFamily = "Inter, sans-serif";
-
-  box.innerHTML = `
-    <div style="color:#eefaff;font-size:18px;font-weight:800;margin-bottom:14px;">
-      Accès historique
-    </div>
-
-    <div style="color:#7f99ad;font-size:13px;margin-bottom:10px;">
-      Entrer le mot de passe
-    </div>
-
-    <input
-      id="historyPasswordInput"
-      type="password"
-      placeholder="Mot de passe"
-      style="
-        width:100%;
-        height:42px;
-        border-radius:10px;
-        border:1px solid rgba(120,190,255,0.15);
-        background:#091322;
-        color:#eefaff;
-        padding:0 12px;
-        font-size:14px;
-        outline:none;
-        box-sizing:border-box;
-      "
-    />
-
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
-      <button id="cancelHistoryBtn"
-        style="
-          height:38px;
-          padding:0 16px;
-          border:none;
-          border-radius:10px;
-          background:#1c2b3d;
-          color:#eefaff;
-          cursor:pointer;
-          font-weight:700;
-        ">
-        Annuler
-      </button>
-
-      <button id="confirmHistoryBtn"
-        style="
-          height:38px;
-          padding:0 16px;
-          border:none;
-          border-radius:10px;
-          background:#ffd84d;
-          color:#000;
-          cursor:pointer;
-          font-weight:900;
-        ">
-        OK
-      </button>
-    </div>
-  `;
-
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-
-  const input = document.getElementById("historyPasswordInput");
-
-  return new Promise((resolve) => {
-    document.getElementById("confirmHistoryBtn").onclick = () => {
-      const value = input.value;
-
-      document.body.removeChild(overlay);
-
-      if (value === HISTORY_PASSWORD) {
-        resolve(true);
-      } else {
-        window.alert("Mot de passe invalide");
-        resolve(false);
-      }
-    };
-
-    document.getElementById("cancelHistoryBtn").onclick = () => {
-      document.body.removeChild(overlay);
-      resolve(false);
-    };
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        document.getElementById("confirmHistoryBtn").click();
-      }
-    });
-
-    setTimeout(() => input.focus(), 50);
-  });
+  return false;
 }
 
 
@@ -3428,9 +3325,8 @@ export default function App() {
     setRoute(path);
   }
 
-  async function navigateHistoryRoute(path) {
-    const allowed = await validateHistoryAccess();
-    if (!allowed) return;
+  function navigateHistoryRoute(path) {
+    if (!validateHistoryAccess()) return;
     navigateRoute(path);
   }
 
@@ -3441,18 +3337,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    async function checkHistoryAccessOnLoad() {
-      if (route === "/historique-jour" || route === "/historique-soir") {
-        const allowed = await validateHistoryAccess();
-
-        if (!allowed) {
-          window.history.replaceState({}, "", "/");
-          setRoute("/");
-        }
+    if (route === "/historique-jour" || route === "/historique-soir") {
+      if (!validateHistoryAccess()) {
+        window.history.replaceState({}, "", "/");
+        setRoute("/");
       }
     }
-
-    checkHistoryAccessOnLoad();
   }, []);
 
 
@@ -3702,7 +3592,7 @@ export default function App() {
     if (!supabase || !session?.user) return;
 
     const { data, error } = await supabase
-      .from(PRODUCTION_HISTORY_TABLE)
+      .from("production_history")
       .select("*")
       .eq("user_id", session.user.id)
       .order("date", { ascending: true });
@@ -3725,7 +3615,7 @@ export default function App() {
     if (!supabase || !session?.user || !dashboardCloudLoaded) return undefined;
 
     const channel = supabase
-      .channel("dashboard_state_abattage_realtime")
+      .channel("dashboard_state_realtime")
       .on(
         "postgres_changes",
         {
@@ -4262,7 +4152,7 @@ export default function App() {
       };
 
       const { error } = await supabase
-        .from(PRODUCTION_HISTORY_TABLE)
+        .from("production_history")
         .upsert(payload, { onConflict: "user_id,date,shift" });
 
       if (error) {
@@ -4285,7 +4175,7 @@ export default function App() {
   async function updateHistoryComment(id, commentaire) {
     if (supabase && session?.user) {
       const { error } = await supabase
-        .from(PRODUCTION_HISTORY_TABLE)
+        .from("production_history")
         .update({ commentaire })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4310,7 +4200,7 @@ export default function App() {
 
     if (supabase && session?.user) {
       const { error } = await supabase
-        .from(PRODUCTION_HISTORY_TABLE)
+        .from("production_history")
         .delete()
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4372,7 +4262,7 @@ export default function App() {
       const nextPhotos = [...(Array.isArray(row.photos) ? row.photos : []), ...uploaded];
 
       const { error: updateError } = await supabase
-        .from(PRODUCTION_HISTORY_TABLE)
+        .from("production_history")
         .update({ photos: nextPhotos })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4419,7 +4309,7 @@ export default function App() {
           : photos.filter((_, index) => index !== imageIndex);
 
       const { error: updateError } = await supabase
-        .from(PRODUCTION_HISTORY_TABLE)
+        .from("production_history")
         .update({ photos: nextPhotos })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4445,7 +4335,7 @@ export default function App() {
 
     if (supabase && session?.user) {
       const { error } = await supabase
-        .from(PRODUCTION_HISTORY_TABLE)
+        .from("production_history")
         .delete()
         .eq("user_id", session.user.id)
         .eq("shift", targetShift);
@@ -5037,7 +4927,7 @@ export default function App() {
                       fontFamily: UI_FONT,
                     }}
                   >
-                    Dashboard Abattage
+                    Dashboard Production
                   </div>
 
                   <div
@@ -6056,11 +5946,11 @@ export default function App() {
                         "Fin",
                         "Minutes travaillées",
                         "Cadence cible / h",
-                        "Potentiel théorique",
-                        "Objectif (%)",
-                        "Objectif réel selon objectif (%)",
+                        "Coupe à 100 %",
+                        "Coupe cible (%)",
+                        "Coupe cible réelle",
                         "Coupe réelle cumulative",
-                        "Coupe réel par bloc",
+                        "Réel bloc",
                         "Écart de coupe",
                         "Efficacité réelle",
                       ].map((h) => (
