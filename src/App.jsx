@@ -34,11 +34,11 @@ function validateHistoryAccess() {
     overlay.style.left = "0";
     overlay.style.width = "100%";
     overlay.style.height = "100%";
-    overlay.style.background = "rgba(0,0,0,0.55)";
+    overlay.style.background = "rgba(0,0,0,0.70)";
     overlay.style.display = "flex";
     overlay.style.alignItems = "center";
     overlay.style.justifyContent = "center";
-    overlay.style.zIndex = "99999";
+    overlay.style.zIndex = "999999";
 
     const modal = document.createElement("div");
 
@@ -102,42 +102,39 @@ function validateHistoryAccess() {
     const input = document.getElementById("historyPasswordInput");
     const button = document.getElementById("historyPasswordBtn");
 
+    let resolved = false;
+
     const close = () => {
       if (document.body.contains(overlay)) {
         document.body.removeChild(overlay);
       }
     };
 
-    const validate = () => {
-      const password = input.value;
+    const finish = (result) => {
+      if (resolved) return;
+      resolved = true;
       close();
+      resolve(result);
+    };
 
-      if (password === HISTORY_PASSWORD) {
-        resolve(true);
+    const validate = () => {
+      if (input.value === HISTORY_PASSWORD) {
+        finish(true);
       } else {
         window.alert("Mot de passe invalide");
-        resolve(false);
+        finish(false);
       }
     };
 
     button.addEventListener("click", validate);
 
     input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        validate();
-      }
-
-      if (e.key === "Escape") {
-        close();
-        resolve(false);
-      }
+      if (e.key === "Enter") validate();
+      if (e.key === "Escape") finish(false);
     });
 
     overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) {
-        close();
-        resolve(false);
-      }
+      if (e.target === overlay) finish(false);
     });
 
     setTimeout(() => input.focus(), 50);
@@ -3423,7 +3420,11 @@ export default function App() {
   const titleSize = mobileCompact ? 14 : 18;
   const clockSize = mobileCompact ? 16 : 24;
   const chartHeight = mobileCompact ? 220 : isTablet ? 240 : 260;
-  const [route, setRoute] = useState(() => window.location.pathname);
+  const [route, setRoute] = useState(() => {
+    const path = window.location.pathname;
+    return path === "/historique-jour" || path === "/historique-soir" ? "/" : path;
+  });
+  const initialRouteRef = useRef(window.location.pathname);
 
   function navigateRoute(path) {
     window.history.pushState({}, "", path);
@@ -3446,10 +3447,14 @@ export default function App() {
 
   useEffect(() => {
     async function checkHistoryAccessOnLoad() {
-      if (route === "/historique-jour" || route === "/historique-soir") {
+      const initialPath = initialRouteRef.current;
+
+      if (initialPath === "/historique-jour" || initialPath === "/historique-soir") {
         const allowed = await validateHistoryAccess();
 
-        if (!allowed) {
+        if (allowed) {
+          navigateRoute(initialPath);
+        } else {
           window.history.replaceState({}, "", "/");
           setRoute("/");
         }
