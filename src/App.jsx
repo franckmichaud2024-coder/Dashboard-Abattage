@@ -24,6 +24,7 @@ const DASHBOARD_IMAGES_BUCKET = "dashboard-images-abattage";
 const UI_FONT = "Inter, Segoe UI, Roboto, Arial, sans-serif";
 
 const HISTORY_PASSWORD = "1Mixture2*";
+let historyAccessGranted = false;
 
 function validateHistoryAccess() {
   const modal = document.createElement("div");
@@ -59,6 +60,7 @@ function validateHistoryAccess() {
 
     ok.onclick = () => {
       if (input.value === HISTORY_PASSWORD) {
+        historyAccessGranted = true;
         close(true);
       } else {
         input.value = "";
@@ -3383,6 +3385,10 @@ export default function App() {
 
     async function protectHistoryDirectAccess() {
       if (route === "/historique-jour" || route === "/historique-soir") {
+        if (historyAccessGranted) {
+          return;
+        }
+
         const allowed = await validateHistoryAccess();
 
         if (!allowed && active) {
