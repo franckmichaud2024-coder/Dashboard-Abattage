@@ -26,105 +26,17 @@ const UI_FONT = "Inter, Segoe UI, Roboto, Arial, sans-serif";
 const HISTORY_PASSWORD = "1Mixture2*";
 
 function validateHistoryAccess() {
-  return new Promise((resolve) => {
-    const overlay = document.createElement("div");
+  const entered = window.prompt("Mot de passe requis pour accéder aux historiques :");
 
-    overlay.style.position = "fixed";
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.background = "rgba(0,0,0,0.55)";
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
-    overlay.style.zIndex = "99999";
+  if (entered === HISTORY_PASSWORD) {
+    return true;
+  }
 
-    const modal = document.createElement("div");
+  if (entered !== null) {
+    window.alert("Mot de passe invalide");
+  }
 
-    modal.style.background = "#0b1220";
-    modal.style.padding = "24px";
-    modal.style.borderRadius = "16px";
-    modal.style.width = "340px";
-    modal.style.boxShadow = "0 0 25px rgba(0,0,0,0.45)";
-    modal.style.border = "1px solid #1e293b";
-    modal.style.color = "white";
-    modal.style.fontFamily = "Arial";
-
-    modal.innerHTML = `
-      <div style="font-size:20px;font-weight:bold;margin-bottom:12px;">
-        Accès sécurisé
-      </div>
-
-      <div style="margin-bottom:14px;color:#cbd5e1;">
-        Mot de passe requis pour accéder aux historiques
-      </div>
-
-      <input
-        id="historyPasswordInput"
-        type="password"
-        placeholder="Entrer le mot de passe"
-        style="
-          width:100%;
-          padding:12px;
-          border-radius:10px;
-          border:none;
-          outline:none;
-          background:#111827;
-          color:white;
-          font-size:16px;
-          margin-bottom:18px;
-          box-sizing:border-box;
-        "
-      />
-
-      <button
-        id="historyPasswordBtn"
-        style="
-          width:100%;
-          padding:12px;
-          border:none;
-          border-radius:10px;
-          background:#2563eb;
-          color:white;
-          font-size:16px;
-          cursor:pointer;
-          font-weight:bold;
-        "
-      >
-        Valider
-      </button>
-    `;
-
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-    const input = document.getElementById("historyPasswordInput");
-    const button = document.getElementById("historyPasswordBtn");
-
-    const validate = () => {
-      const password = input.value;
-
-      document.body.removeChild(overlay);
-
-      if (password === HISTORY_PASSWORD) {
-        resolve(true);
-      } else {
-        window.alert("Mot de passe invalide");
-        resolve(false);
-      }
-    };
-
-    button.addEventListener("click", validate);
-
-    input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        validate();
-      }
-    });
-
-    input.focus();
-  });
+  return false;
 }
 
 
@@ -3414,7 +3326,10 @@ export default function App() {
   }
 
   function navigateHistoryRoute(path) {
-    if (!validateHistoryAccess()) return;
+    if (!validateHistoryAccess()) {
+      return;
+    }
+
     navigateRoute(path);
   }
 
@@ -5015,7 +4930,7 @@ export default function App() {
                       fontFamily: UI_FONT,
                     }}
                   >
-                    Dashboard Production
+                    Dashboard Abattage
                   </div>
 
                   <div
