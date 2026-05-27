@@ -3364,8 +3364,8 @@ export default function App() {
     setRoute(path);
   }
 
-  function navigateHistoryRoute(path) {
-    if (!validateHistoryAccess()) {
+  async function navigateHistoryRoute(path) {
+    if (!(await validateHistoryAccess())) {
       return;
     }
 
@@ -3379,13 +3379,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (route === "/historique-jour" || route === "/historique-soir") {
-      if (!validateHistoryAccess()) {
-        window.history.replaceState({}, "", "/");
-        setRoute("/");
+    let active = true;
+
+    async function protectHistoryDirectAccess() {
+      if (route === "/historique-jour" || route === "/historique-soir") {
+        const allowed = await validateHistoryAccess();
+
+        if (!allowed && active) {
+          window.history.replaceState({}, "", "/");
+          setRoute("/");
+        }
       }
     }
-  }, []);
+
+    protectHistoryDirectAccess();
+
+    return () => {
+      active = false;
+    };
+  }, [route]);
 
 
   useEffect(() => {
