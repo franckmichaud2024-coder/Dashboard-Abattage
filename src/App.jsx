@@ -26,18 +26,56 @@ const UI_FONT = "Inter, Segoe UI, Roboto, Arial, sans-serif";
 const HISTORY_PASSWORD = "1Mixture2*";
 
 function validateHistoryAccess() {
-  const entered = window.prompt("Mot de passe requis pour accéder aux historiques :");
+  const modal = document.createElement("div");
+  modal.style.position = "fixed";
+  modal.style.inset = "0";
+  modal.style.zIndex = "999999";
+  modal.style.background = "rgba(0,0,0,0.72)";
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
 
-  if (!entered) {
-    return false;
-  }
+  modal.innerHTML = `
+    <div style="width:360px;max-width:calc(100vw - 32px);background:#0f172a;border:1px solid rgba(120,190,255,.25);border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.55);font-family:Inter,Segoe UI,Arial,sans-serif;color:white;">
+      <div style="font-size:20px;font-weight:900;margin-bottom:12px;">Accès sécurisé</div>
+      <div style="font-size:14px;margin-bottom:14px;color:#dbeafe;">Mot de passe requis pour accéder aux historiques</div>
+      <input id="history-password-input" type="password" autocomplete="off" autofocus style="width:100%;height:42px;border-radius:10px;border:1px solid rgba(255,216,77,.35);background:#111827;color:white;text-align:center;font-size:18px;font-weight:900;outline:none;box-sizing:border-box;margin-bottom:16px;" />
+      <button id="history-password-ok" style="width:100%;height:42px;border:0;border-radius:10px;background:#2563eb;color:white;font-size:15px;font-weight:900;cursor:pointer;">Valider</button>
+      <button id="history-password-cancel" style="width:100%;height:36px;border:0;border-radius:10px;background:transparent;color:#94a3b8;font-size:13px;font-weight:800;cursor:pointer;margin-top:8px;">Annuler</button>
+    </div>
+  `;
 
-  if (entered !== HISTORY_PASSWORD) {
-    window.alert("Mot de passe invalide");
-    return false;
-  }
+  document.body.appendChild(modal);
 
-  return true;
+  const input = modal.querySelector("#history-password-input");
+  const ok = modal.querySelector("#history-password-ok");
+  const cancel = modal.querySelector("#history-password-cancel");
+
+  return new Promise((resolve) => {
+    const close = (value) => {
+      document.body.removeChild(modal);
+      resolve(value);
+    };
+
+    ok.onclick = () => {
+      if (input.value === HISTORY_PASSWORD) {
+        close(true);
+      } else {
+        input.value = "";
+        input.placeholder = "Mot de passe invalide";
+        input.focus();
+      }
+    };
+
+    cancel.onclick = () => close(false);
+
+    input.onkeydown = (e) => {
+      if (e.key === "Enter") ok.click();
+      if (e.key === "Escape") close(false);
+    };
+
+    setTimeout(() => input.focus(), 50);
+  });
 }
 
 
