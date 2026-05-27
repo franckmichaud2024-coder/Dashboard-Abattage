@@ -102,10 +102,15 @@ function validateHistoryAccess() {
     const input = document.getElementById("historyPasswordInput");
     const button = document.getElementById("historyPasswordBtn");
 
+    const close = () => {
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
+    };
+
     const validate = () => {
       const password = input.value;
-
-      document.body.removeChild(overlay);
+      close();
 
       if (password === HISTORY_PASSWORD) {
         resolve(true);
@@ -117,13 +122,25 @@ function validateHistoryAccess() {
 
     button.addEventListener("click", validate);
 
-    input.addEventListener("keypress", (e) => {
+    input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         validate();
       }
+
+      if (e.key === "Escape") {
+        close();
+        resolve(false);
+      }
     });
 
-    input.focus();
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        close();
+        resolve(false);
+      }
+    });
+
+    setTimeout(() => input.focus(), 50);
   });
 }
 
@@ -3413,8 +3430,11 @@ export default function App() {
     setRoute(path);
   }
 
-  function navigateHistoryRoute(path) {
-    if (!validateHistoryAccess()) return;
+  async function navigateHistoryRoute(path) {
+    const allowed = await validateHistoryAccess();
+
+    if (!allowed) return;
+
     navigateRoute(path);
   }
 
@@ -3425,12 +3445,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (route === "/historique-jour" || route === "/historique-soir") {
-      if (!validateHistoryAccess()) {
-        window.history.replaceState({}, "", "/");
-        setRoute("/");
+    async function checkHistoryAccessOnLoad() {
+      if (route === "/historique-jour" || route === "/historique-soir") {
+        const allowed = await validateHistoryAccess();
+
+        if (!allowed) {
+          window.history.replaceState({}, "", "/");
+          setRoute("/");
+        }
       }
     }
+
+    checkHistoryAccessOnLoad();
   }, []);
 
 
