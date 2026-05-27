@@ -20,6 +20,7 @@ const HISTORY_KEY = "dashboard_historique_abattage_v1";
 const HISTORY_IMAGE_KEY = "dashboard_historique_images_v1";
 const DASHBOARD_STATE_TABLE = "dashboard_state_abattage";
 const DASHBOARD_IMAGES_BUCKET = "dashboard-images-abattage";
+const PRODUCTION_HISTORY_TABLE = "production_history_abattage";
 
 const UI_FONT = "Inter, Segoe UI, Roboto, Arial, sans-serif";
 
@@ -3652,7 +3653,7 @@ export default function App() {
     if (!supabase || !session?.user) return;
 
     const { data, error } = await supabase
-      .from("production_history")
+      .from(PRODUCTION_HISTORY_TABLE)
       .select("*")
       .eq("user_id", session.user.id)
       .order("date", { ascending: true });
@@ -4212,7 +4213,7 @@ export default function App() {
       };
 
       const { error } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .upsert(payload, { onConflict: "user_id,date,shift" });
 
       if (error) {
@@ -4235,7 +4236,7 @@ export default function App() {
   async function updateHistoryComment(id, commentaire) {
     if (supabase && session?.user) {
       const { error } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .update({ commentaire })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4260,7 +4261,7 @@ export default function App() {
 
     if (supabase && session?.user) {
       const { error } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .delete()
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4322,7 +4323,7 @@ export default function App() {
       const nextPhotos = [...(Array.isArray(row.photos) ? row.photos : []), ...uploaded];
 
       const { error: updateError } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .update({ photos: nextPhotos })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4369,7 +4370,7 @@ export default function App() {
           : photos.filter((_, index) => index !== imageIndex);
 
       const { error: updateError } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .update({ photos: nextPhotos })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -4395,7 +4396,7 @@ export default function App() {
 
     if (supabase && session?.user) {
       const { error } = await supabase
-        .from("production_history")
+        .from(PRODUCTION_HISTORY_TABLE)
         .delete()
         .eq("user_id", session.user.id)
         .eq("shift", targetShift);
