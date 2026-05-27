@@ -28,15 +28,16 @@ const HISTORY_PASSWORD = "1Mixture2*";
 function validateHistoryAccess() {
   const entered = window.prompt("Mot de passe requis pour accéder aux historiques :");
 
-  if (entered === HISTORY_PASSWORD) {
-    return true;
+  if (!entered) {
+    return false;
   }
 
-  if (entered !== null) {
+  if (entered !== HISTORY_PASSWORD) {
     window.alert("Mot de passe invalide");
+    return false;
   }
 
-  return false;
+  return true;
 }
 
 
